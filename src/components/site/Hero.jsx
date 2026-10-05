@@ -26,9 +26,9 @@ export default function Hero() {
           </p>
 
           <h1 className="m-0 font-display text-[42px] font-bold leading-[0.92] tracking-[-0.04em] text-white min-[620px]:text-[clamp(50px,5.8vw,84px)]">
-            Pequenas descobertas.
+            Aqui se aprende
             <br />
-            <em className="not-italic text-pluft-yellow">Grandes começos.</em>
+            <em className="not-italic text-pluft-yellow">brincando.</em>
           </h1>
 
           <p className="mt-7 max-w-[600px] text-[16px] leading-[1.72] text-white/85 min-[620px]:text-[19px]">

@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 export default function Wrap({ children, className }) {
   return (
-    <div className={cn('mx-auto w-full max-w-[1180px] px-[14px] min-[620px]:px-[22px]', className)}>
+    <div className={cn('mx-auto w-full max-w-[1180px] px-[12px] sm:px-[14px] min-[620px]:px-[22px]', className)}>
       {children}
     </div>
   );
