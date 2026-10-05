@@ -9,7 +9,6 @@ import ScrollToTop from './components/ScrollToTop';
 // Add page imports here
 import Home from '@/pages/Home';
 import Matriculas from '@/pages/Matriculas';
-import Galeria from '@/pages/Galeria';
 import FAQ from '@/pages/FAQ';
 
 const AuthenticatedApp = () => {
@@ -40,7 +39,6 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/matriculas" element={<Matriculas />} />
-      <Route path="/galeria" element={<Galeria />} />
       <Route path="/faq" element={<FAQ />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

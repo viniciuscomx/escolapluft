@@ -9,7 +9,6 @@ import { WHATSAPP_VISIT_URL } from '@/lib/siteAssets';
 const NAV_LINKS = [
   { label: 'A Pluft', hash: '#sobre' },
   { label: 'Etapas', hash: '#etapas' },
-  { label: 'Galeria', to: '/galeria' },
   { label: 'Matrículas', to: '/matriculas' },
   { label: 'FAQ', to: '/faq' },
   { label: 'Onde estamos', hash: '#onde-estamos' },
