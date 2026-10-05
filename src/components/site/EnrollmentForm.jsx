@@ -24,21 +24,20 @@ const formatWhatsAppMessage = (formData) => {
     return date.toLocaleDateString('pt-BR');
   };
 
-  const message = `🏫 *SOLICITAÇÃO DE VAGA - ESCOLA PLUFT*
+  const message = `*SOLICITAÇÃO DE VAGA - ESCOLA PLUFT*
 
-👶 *Nome do aluno(a):* ${formData.student_name || 'Não informado'}
-📅 *Data de nascimento:* ${formatDate(formData.birth_date)}
-🎒 *Etapa de interesse:* ${formData.stage || 'Não informado'}
+*Nome do aluno(a):* ${formData.student_name || 'Não informado'}
+*Data de nascimento:* ${formatDate(formData.birth_date)}
+*Etapa de interesse:* ${formData.stage || 'Não informado'}
 
-👤 *Nome do responsável:* ${formData.guardian_name || 'Não informado'}
-📧 *E-mail:* ${formData.email || 'Não informado'}
-📱 *Telefone:* ${formData.phone || 'Não informado'}
+*Nome do responsável:* ${formData.guardian_name || 'Não informado'}
+*E-mail:* ${formData.email || 'Não informado'}
+*Telefone:* ${formData.phone || 'Não informado'}
 
-💬 *Mensagem adicional:*
-${formData.message || 'Nenhuma mensagem adicional.'}
+${formData.message ? `*Mensagem adicional:*
+${formData.message}
 
----
-_Enviado pelo formulário do site da Escola Pluft_`;
+` : ''}*Enviado pelo formulário do site da Escola Pluft*`;
 
   return encodeURIComponent(message);
 };
