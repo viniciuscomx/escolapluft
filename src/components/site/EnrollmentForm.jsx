@@ -16,6 +16,33 @@ const EMPTY_FORM = {
 
 const STAGES = ['Berçário', 'Educação Infantil', 'Ainda não sei'];
 
+// Função para formatar os dados do formulário para WhatsApp
+const formatWhatsAppMessage = (formData) => {
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Não informado';
+    const date = new Date(dateString + 'T00:00:00');
+    return date.toLocaleDateString('pt-BR');
+  };
+
+  const message = `🏫 *SOLICITAÇÃO DE VAGA - ESCOLA PLUFT*
+
+👶 *Nome do aluno(a):* ${formData.student_name || 'Não informado'}
+📅 *Data de nascimento:* ${formatDate(formData.birth_date)}
+🎒 *Etapa de interesse:* ${formData.stage || 'Não informado'}
+
+👤 *Nome do responsável:* ${formData.guardian_name || 'Não informado'}
+📧 *E-mail:* ${formData.email || 'Não informado'}
+📱 *Telefone:* ${formData.phone || 'Não informado'}
+
+💬 *Mensagem adicional:*
+${formData.message || 'Nenhuma mensagem adicional.'}
+
+---
+_Enviado pelo formulário do site da Escola Pluft_`;
+
+  return encodeURIComponent(message);
+};
+
 export default function EnrollmentForm() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
@@ -27,16 +54,45 @@ export default function EnrollmentForm() {
     setForm((current) => ({ ...current, [name]: value }));
   };
 
+  // Função para enviar via WhatsApp
+  const sendToWhatsApp = (formData) => {
+    const message = formatWhatsAppMessage(formData);
+    const whatsappUrl = `${WHATSAPP_URL}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   const submit = async (event) => {
     event.preventDefault();
     setSaving(true);
     setError('');
 
+    // Validação básica
+    const requiredFields = ['student_name', 'birth_date', 'guardian_name', 'email', 'phone'];
+    const missingFields = requiredFields.filter(field => !form[field].trim());
+    
+    if (missingFields.length > 0) {
+      setError('Por favor, preencha todos os campos obrigatórios.');
+      setSaving(false);
+      return;
+    }
+
     try {
+      // Tentar salvar no Base44 (opcional)
       await base44.entities.EnrollmentRequest.create({ ...form, message: form.message.trim() });
+      
+      // Enviar para WhatsApp
+      sendToWhatsApp(form);
+      
       setSent(true);
-    } catch {
-      setError('Não conseguimos enviar sua solicitação agora. Tente novamente ou fale com a gente pelo WhatsApp.');
+    } catch (err) {
+      // Se falhar no Base44, ainda assim enviar para WhatsApp
+      console.warn('Erro ao salvar no Base44:', err);
+      
+      // Enviar para WhatsApp mesmo se o Base44 falhar
+      sendToWhatsApp(form);
+      
+      setError('Sua solicitação foi enviada para o WhatsApp! Se preferir, você pode também tentar enviar novamente.');
+      setSent(true);
     } finally {
       setSaving(false);
     }
@@ -45,18 +101,28 @@ export default function EnrollmentForm() {
   if (sent) {
     return (
       <div className="rounded-[22px] border border-[rgba(81,85,121,0.14)] bg-white p-7 shadow-[0_20px_50px_rgba(39,41,67,0.08)] min-[620px]:p-10">
-        <span className="mb-3 block text-[28px] text-pluft-red">✳</span>
+        <span className="mb-3 block text-[28px] text-pluft-red">✅</span>
         <h2 className="m-0 font-display text-[30px] leading-[1.05] text-pluft-blue min-[620px]:text-[36px]">
-          Recebemos seu pedido de vaga!
+          Solicitação enviada com sucesso!
         </h2>
         <p className="mt-4 text-[16px] leading-[1.75] text-[rgba(39,41,67,0.7)]">
-          Nossa equipe vai entrar em contato pelo telefone ou e-mail informado para conversar sobre a
-          vaga de <strong>{form.student_name}</strong>. Se preferir adiantar, é só chamar no WhatsApp.
+          Suas informações sobre a vaga para <strong>{form.student_name}</strong> foram enviadas diretamente 
+          para o nosso WhatsApp! Nossa equipe vai entrar em contato em breve.
         </p>
-        <div className="mt-7">
+        <div className="mt-7 flex flex-wrap gap-3">
           <Pill href={WHATSAPP_URL} variant="red" size="small" target="_blank" rel="noopener">
-            Falar no WhatsApp
+            Continuar no WhatsApp
           </Pill>
+          <button
+            onClick={() => {
+              setSent(false);
+              setForm(EMPTY_FORM);
+              setError('');
+            }}
+            className="inline-flex items-center rounded-full border-2 border-pluft-blue bg-transparent px-5 py-2 text-sm font-bold text-pluft-blue transition-colors hover:bg-pluft-blue hover:text-white"
+          >
+            Nova solicitação
+          </button>
         </div>
       </div>
     );
@@ -136,15 +202,36 @@ export default function EnrollmentForm() {
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={saving}
-        className="mt-7 inline-flex min-h-[48px] items-center justify-center rounded-full bg-pluft-red px-6 font-black text-white shadow-[0_10px_24px_rgba(232,71,53,0.16)] transition-transform duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none min-[620px]:min-h-[52px] min-[620px]:px-[25px]"
-      >
-        {saving ? 'Enviando...' : 'Quero solicitar uma vaga'}
-      </button>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <button
+          type="submit"
+          disabled={saving}
+          className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-pluft-red px-6 font-black text-white shadow-[0_10px_24px_rgba(232,71,53,0.16)] transition-transform duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none min-[620px]:min-h-[52px] min-[620px]:px-[25px]"
+        >
+          {saving ? (
+            <>
+              <span className="mr-2">📱</span>
+              Enviando para WhatsApp...
+            </>
+          ) : (
+            <>
+              <span className="mr-2">📱</span>
+              Enviar via WhatsApp
+            </>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => sendToWhatsApp(form)}
+          className="inline-flex min-h-[48px] items-center justify-center rounded-full border-2 border-pluft-red bg-transparent px-5 font-bold text-pluft-red transition-colors hover:bg-pluft-red hover:text-white min-[620px]:min-h-[52px] min-[620px]:px-6"
+        >
+          💬 Só WhatsApp
+        </button>
+      </div>
 
       <p className="mt-4 text-[13px] leading-[1.6] text-[rgba(39,41,67,0.55)]">
+        Suas informações serão enviadas diretamente para nosso WhatsApp. 
         Usamos seus dados apenas para o contato sobre a matrícula.
       </p>
     </form>
